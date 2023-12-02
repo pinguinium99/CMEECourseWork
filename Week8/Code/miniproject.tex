@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+
+\usepackage{sectsty}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\graphicspath{ {../Results}}
+
+\newcommand\wordcount{
+    \immediate\write18{texcount -1 -sum -merge \jobname.tex > \jobname-words.sum }
+    \input{\jobname-words.sum}
+}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\title{ Comparing phenomenological and mechanistic models of bacterial growth curves}
+\author{ Prannoy Thazhakaden }
+\date{\today}
+
+\begin{document}
+\maketitle	
+\pagebreak
+
+This document contains \wordcount{} words.
+
+\pagebreak
+%--Paper--
+\section{Introduction}
+
+Bacteria play essential roles in many processes from nutrient cycling to the spread disease. Understanding bacteria and their functions are essential to developing methods of dealing with problems related to climate change, medical and food microbiology, microbial communities have even been used in bio-remediation. The growth rate of a species of bacteria on specific substrates can influence their role in a microbial community and we can use our understanding of bacterial growth curves to modulate microbial growth. Multiple bacterial growth curve models have been produced to better understand the stages of growth that bacteria undergo. Bacterial growth curves can be modelled using phenomenological models and mechanistic models and while phenomenological models have their uses in hypothesis testing on a specific data set they can not provide much information on the general underlying mechanisms that drive bacterial growth\cite{Zwietering1990ModelingCurve}. Early mechanistic models such as the three-phase linear model provide us with three stages of bacterial growth in three lines\cite{Buchanan1997WhenCurves}. The lag phase where there is little growth. The exponential growth phase where the maximum growth rate occurs, in the three-phase linear model this can be calculated using a linear model of population biomass in response to time from the end of the lag phase to the start of the last phase, the stationary phase. The stationary phase is reached when the population has reached its carrying capacity and has no further room for growth. Some studies also collect data on the death phase of bacteria depending on the purpose of the study and this can affect how well models fit to the data. While this simple model is useful in some cases it is not realistic. Producing models that are flexible can be done by sacrificing precision of the model for realism and generality as mentioned by Richard Levins\cite{RICHARDLEVINS1966THEBIOLOGY}.more complex models have been produced since then to capture the sigmoidal growth curve seen from the data such as the logistic and the modified Gompertz model produced with generality in mind and have been used in many different studies in many fields. In this is study we will look at a cubic, logistic and the Gompertz model and compare how well they fit a large set of different bacterial growth curves. We would expect the Gompertz model to fit best for all the models but it is possible that the logistic model might fit better when there is minimal lag in the data and the cubic model might fit better with data that have a prominent death phase.
+
+
+
+
+\section{Methods}
+
+Data of bacterial growth was collected from multiple studies and the data contained population biomass measured with different methods. the data was first wrangled to create a unique ID for each study, temperature, species and medium the bacteria was grown in. The population biomass was plotted against time to see the general curve of the data and some showed a clear sigmoidal growth curve that had a lag phase then a log phase of exponential growth and plateaued at the carrying capacity while some did not show evidence of a lag phase and others show a decline in population biomass after reaching a peak. A few of these data subsets did not have any noticeable curve and some looked like there may have been error in recording the data. the data was plotted again in log scale and we were able to identify a more sigmoidal shape in the plots overall.
+
+We chose to use information criterion methods to check the fit of the models instead of re-sampling methods such as K-fold cross validation as it would make comparing models for each data subset easier and to maximise the number of data subsets since there is no need for a hold out test set. We used and values for AICc and $R^2$ was calculated for comparison of models as some of the data subsets had few data points and an AIC value might not be accurate\cite{Burnham2002ModelApproach}. We will use to highest $R^2$ and lowest AICc to see which model works best for each subset. 
+
+A linear model was created using a cubic polynomial that will act as a phenomenological model. A plotting function was produced to see how well the model fit each data subset.
+
+\[
+      N_t = B_1t + B_2t^2 + B_3t^3
+\]
+
+the logistic model function was then produced and to find the best fit of the model for each subset we first produced a range of 100 starting values sampled from a normal distribution around a mean starting value for each coefficient. For the logistic model this was done for the maximum growth rate $Rmax$, initial population size $N_0$ and carrying capacity $K$. 
+% Logistic Equation
+
+\[
+      N_t = \frac{N_0Ke^{rt}}{K + N_0(e^{rt} -1)} 
+\]
+
+The last model was the modified Gompertrz model\cite{Zwietering1990ModelingCurve}. This model has been used in many studies on bacterial growth curves and unlike the logistic model uses a value for $T_lag$ as the end of the lag phase in the sigmoidal growth curve. The sampling for $t_lag$ was conducted from a uniform distribution greater than zero to make sure to capture the change from the lag phase to the exponential growth as some data sets show little to no lag phase when plotted. As seen in the equation below the model gives the log of the population biomass at the given time and is produced for log transformed data and the functions for producing the starting values added a column of log transformed population biomass.
+
+% Gompertz Equation
+
+\[
+     Log(N_t) = {N_0}+({Nmax}-{N_0})e^{-e^{r_{max}^{exp(1)\frac{t_{lag^{-t}}}{(Nmax - N_0)log(10)}+1}}}
+\]
+
+The sampled starting values were run through each of the models using the nls.lm function in the minpack.lm package. The best fitting model was collected using the lowest AICc value and this was then repeated for each data subset and plotted to see how well the models fit the data and starting value calculation was then adjusted to maximise the fit. 
+\subsection{Computing tools}
+
+The data wrangling was done in R using Dplyr and the tidyverse range of packages for their flexibility and ease of use to add the unique IDs and formatting the results. The reduce function was very useful for binding the three separate result outputs in and making sure the ID column matched. The model fitting was also done in R using the nls.lm function in the minpack.lm package and the plotting of the models was then done using the ggplot2 package for its flexibility and ease of use.
+
+This report was written in LaTex and a bash shell script was used to run the R script an compile the LaTex document as a PDF.
+
+\section{Results}
+
+The Gompertz model was not the best fitting model for the most data subsets as we had expected and while the Cubic model fit better in more models than the Gompertz the logistic model fitted best using both $R^2$ and AICc for comparison as presented in Table 1. The cubic model was able to fit on all the data sets as it was a statistical model but when plotted on a graph many of the fits were far from the shape of the data. Between mechanistic models the Gompertz model was able to fit more subsets than the logistic model.
+\begin{table}[hbt!]
+\begin{center}
+
+\caption{Table of the number of best fits for each model based on lowest AICc score and highest $R^2$ value and the total number of fits out of 285 data subsets}
+    
+\begin{tabular}{llll}
+\textbf{Model}                         & \textbf{Best fit (AICc)} & \multicolumn{1}{c}{\textbf{Best fit (R^2)}} & \multicolumn{1}{c}{\textbf{Total fits (AICc)}} \\ \hline
+\multicolumn{1}{l|}{\textbf{Cubic}}    & 55                       & 54                                                           & 285                                    \\
+\multicolumn{1}{l|}{\textbf{Logistic}} & 77                       & 65                                                           & 175                                    \\
+\multicolumn{1}{l|}{\textbf{Gompertz}} & 39                       & 47                                                           & 266                               
+\end{tabular}
+\end{center}   
+\end{table}
+
+
+
+The quality of the fits varied significantly and figure 1a a shows a well fitting example plot while figure 1b shows the cubic model did not fit the data well. As seen in Table 1 you can see that the cubic model was able to be fitted for all the data sub sets since it was not going though selection with nls.lm. 
+
+
+\begin{figure}[hbt!]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=8cm]{fig1a.pdf}
+\caption{}
+\centering
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=8cm]{fig1b.pdf}
+\centering
+\caption{}
+\end{subfigure}%
+\caption{Example model fits for Cubic, Logistic and Gompertz for log cell count over time.}
+\end{figure}
+\pagebreak
+There were examples of the cubic model fitting better to the data than the mechanistic models during the death phase of the growth curve as shown in figure 2.
+
+\begin{figure}[hbt!]
+\includegraphics[width=8cm]{fig2.pdf}
+\centering
+\caption{Example model fits for Cubic, Logistic and Gompertz for log cell count over time.}
+\end{figure}
+
+Finally there are examples where the mechanistic models fail to reach the maximum population biomass as shown in figure 3.
+
+\begin{figure}[hbt!]
+\includegraphics[width=8cm]{fig3.pdf}
+\centering
+\caption{Example model fits for Cubic, Logistic and Gompertz for log cell count over time.}
+\end{figure}
+\pagebreak
+\section{Discussion}
+
+\subsection{Models}
+
+The cubic model was able to fit better than the other models for 55 data subsets using AICc to calculate the best and this is may be due to the presence of a death phase in the data. While some studies have no interest in the decline of the population others may collect data after the population has reach its carrying capacity and modeling death rate can be important when looking at cycling populations\cite{Kendall1999WHYAPPROACHES} and while cubic model can fit well it tells us little about the mechanism by which the populaton is declining.
+
+The Gompertz model should have a had a significant sigmoidal curve and this could not be seen in the results and this must have been caused by issues in the sampling of the starting values or the lack of a lag phase in certain data subsets. Calculation of the time at which the lag phase ends is sampled from a uniform distribution to maximise the probability of finding the best value but made very little difference in the number of fits but changes in the starting values of the highest(K) and lowest $(N_0)$ population biomass made a large change to the number of fits produced by the fitting algorithm. 
+
+The logistic model did not show any evidence of a lag phase and since we need all three models to fit to make an accurate comparison most subsets that had a prominent lag phase was not compared. The lag phase occurs as the bacteria prepares for the exponential growth phase and is present when they are introduced to a new environment with new nutrients. The measurement method collecting the data for biomass can influence the prominence of the lag phase and lead to inaccurate representations\cite{Rolfe2012LagAccumulation}. Rolfe $et$ $al$ mention that the use of optical density at 600nm is misleading due to variations in cell size. We know that this was a method used to collect the data that we used for the model comparison and could possibly be one of the reasons we do not see a lag phase in many data sets and this may give an advantage to the logistic model over the Gompertz model that utilises the time of the end of the lag phase in its equation.
+
+\section{conclusion}
+
+Overall all three models had their issues with fitting to certain bacterial growth curves and it may be possible to fine tune to models with more time and effort to reduce the risk of producing an ill fitting model. As the complexity of the model increases it is easier to receive bad fits due to little differences in starting values or even get stuck in a local optima and documentation on the topic can be limited or too complex for many users \cite{Bolker2013StrategiesBUGS}. The next steps would involve comparing other models such as Baranyi-Roberts model\cite{Grijspeerdt1999EstimatingGrowth}. However it can be argued that the Baranyi-Roberts model provides little mechanistic information  and is functionally a phenomenological model\cite{Micha2011MicrobialCannot}. Another consideration for future research is looking at the relationship between microbial growth rate and yield, as different microbes use different strategies for growth it may be possible to model them using their growth strategy as a parameter within the model.
+
+\pagebreak
+\bibliographystyle{apalike} 
+\bibliography{references}
+
+
+%--/Paper--
+
+\end{document}
