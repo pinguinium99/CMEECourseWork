@@ -1,0 +1,47 @@
+R is about to run
+
+R version 4.3.1 (2023-06-16) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-conda-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> rm(list=ls())
+> 
+> name <- "Prannoy Thazhakaden"
+> preferred_name <- "Prannoy"
+> email <- "PVT23@imperial.ac.uk"
+> username <- "PVT23"
+> 
+> source("pvt23_HPC_2023_main.R")
+> iter <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX")) 
+> set.seed(iter)
+> community <- c(500, 1000, 2500, 5000)
+> speciation <- 0.003676
+> filename <- paste0("HPCoutput_file",iter,".rda")
+> neutral_cluster_run(speciation_rate=speciation, size = community[iter %% 4+1], wall_time=(11.5*60), interval_rich=1, interval_oct= community[iter %% 4+1]/10, burn_in_generations=community[iter %% 4+1]*8, output_file_name = filename)
+>   
+> 
+R has finished running
+
+============================================
+
+        Job resource usage summary 
+
+                 Memory (GB)    NCPUs
+ Requested  :         1             1
+ Used       :         0 (peak)   0.98 (ave)
+
+============================================

@@ -26,9 +26,10 @@ def is_an_oak(name):
     False
 
     """
-
-    return name.lower().startswith('quercus ') #space makes sure that quercus is not unintended
-
+    part = name.split()
+    if len(part) > 0 and len(part[0]) == 7:
+        return name.lower().startswith('quercus') #space makes sure that quercus is not unintended
+    return False
 
 def main(argv): 
     """ Opens data file and writes in an output file with just oak data """
@@ -38,7 +39,11 @@ def main(argv):
     taxa = csv.reader(f)
     csvwrite = csv.writer(g)
     oaks = set()
+    is_header = True
     for row in taxa:
+        if is_header:
+            is_header = False
+            continue
         print(row)
         print ("The genus is: ") 
         print(row[0] + '\n')
